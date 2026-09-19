@@ -59,6 +59,32 @@ function validateOne(step: StepLike, path: string, issues: ValidationIssue[]): v
         issues.push({ path: `${path}.text`, message: 'message text is required' })
       }
       break
+case 'send_image':
+  if (!nonEmpty(c.link)) {
+    issues.push({
+      path: `${path}.link`,
+      message: 'image URL is required',
+    })
+    break
+  }
+
+  try {
+    const u = new URL(String(c.link))
+
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+      issues.push({
+        path: `${path}.link`,
+        message: 'image URL must use http or https',
+      })
+    }
+  } catch {
+    issues.push({
+      path: `${path}.link`,
+      message: 'image URL is not valid',
+    })
+  }
+  break
+      
     case 'send_buttons':
     case 'send_list': {
       // The whole step_config IS the interactive payload; validate it
