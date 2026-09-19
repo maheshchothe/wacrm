@@ -17,6 +17,7 @@ import {
   Trash2,
   GripVertical,
   MessageSquare,
+  ImageIcon,
   FileText,
   Tag,
   TagIcon,
@@ -108,6 +109,7 @@ interface StepMeta {
 
 const STEP_META: Record<AutomationStepType, StepMeta> = {
   send_message: { label: "send_message", icon: MessageSquare, border: "border-l-primary" },
+  send_image: { label: "send_image", icon: ImageIcon, border: "border-l-primary"},
   send_buttons: { label: "send_buttons", icon: MousePointerClick, border: "border-l-primary" },
   send_list: { label: "send_list", icon: List, border: "border-l-primary" },
   send_template: { label: "send_template", icon: FileText, border: "border-l-primary" },
@@ -124,6 +126,7 @@ const STEP_META: Record<AutomationStepType, StepMeta> = {
 
 const ADDABLE_STEPS: AutomationStepType[] = [
   "send_message",
+  "send_image",
   "send_buttons",
   "send_list",
   "send_template",
@@ -174,6 +177,8 @@ function blankConfig(type: AutomationStepType): Record<string, unknown> {
   switch (type) {
     case "send_message":
       return { text: "" }
+    case "send_image":
+      return { link: "", caption: "" }
     case "send_buttons":
       return toStepConfig(blankButtonsPayload())
     case "send_list":
@@ -1483,6 +1488,29 @@ function StepEditor({
           )}
         </>
       )
+
+      case "send_image":
+  return (
+    <>
+      <FieldBlock label="Image URL">
+        <Input
+          placeholder="https://example.com/image.jpg"
+          value={(cfg.link as string) ?? ""}
+          onChange={(e) => set({ link: e.target.value })}
+          className="bg-muted text-foreground"
+        />
+      </FieldBlock>
+
+      <FieldBlock label="Caption">
+        <Textarea
+          placeholder="Optional image caption"
+          value={(cfg.caption as string) ?? ""}
+          onChange={(e) => set({ caption: e.target.value })}
+          className="min-h-20 bg-muted text-foreground"
+        />
+      </FieldBlock>
+    </>
+  )
     case "send_webhook":
       return (
         <>
@@ -1532,6 +1560,10 @@ function previewFor(step: BuilderStep): string {
   switch (step.step_type) {
     case "send_message":
       return (step.step_config.text as string) || "no text yet"
+    case "send_image":
+      return (step.step_config.caption as string)
+        || (step.step_config.link as string)
+        || "no image yet"
     case "send_buttons":
     case "send_list":
       return interactivePayloadPreviewText(asInteractive(step.step_config)) || "no body yet"
