@@ -488,6 +488,7 @@ export type AutomationTriggerType =
 
 export type AutomationStepType =
   | 'send_message'
+  | 'send_image'
   | 'send_buttons'
   | 'send_list'
   | 'send_template'
@@ -542,6 +543,8 @@ export type AutomationTriggerConfig =
 
 export interface SendMessageStepConfig {
   text: string;
+  link: string;
+  caption?: string;
 }
 
 /**
@@ -614,6 +617,7 @@ export interface SendWebhookStepConfig {
 
 export type AutomationStepConfig =
   | SendMessageStepConfig
+  | SendImageStepConfig
   | SendButtonsStepConfig
   | SendListStepConfig
   | SendTemplateStepConfig
