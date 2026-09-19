@@ -8,6 +8,7 @@ import type {
   InteractiveReplyTriggerConfig,
   TagTriggerConfig,
   SendMessageStepConfig,
+  SendImageStepConfig,
   SendButtonsStepConfig,
   SendListStepConfig,
   SendTemplateStepConfig,
@@ -24,6 +25,7 @@ import { MAX_TAG_CHAIN_DEPTH, getTagChainDepth } from '@/lib/contacts/tag-chain'
 import { engineSendText, engineSendTemplate, engineSendInteractive } from './meta-send'
 import { validateInteractivePayload } from '@/lib/whatsapp/interactive'
 import { isDeliverableUrl } from '@/lib/webhooks/ssrf'
+import { engineSendMedia } from '@/lib/flows/meta-send'
 
 // ------------------------------------------------------------
 // Public API
@@ -375,6 +377,37 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
       return `sent via Meta (${whatsapp_message_id})`
     }
 
+      case 'send_image': {
+  const cfg = step.step_config as SendImageStepConfig
+
+  if (!args.contactId) {
+    throw new Error('send_image needs a contact')
+  }
+
+  const link = interpolate(cfg.link, args).trim()
+
+  if (!link) {
+    throw new Error('send_image needs an image URL')
+  }
+
+  const caption = cfg.caption
+    ? interpolate(cfg.caption, args)
+    : undefined
+
+  const conversationId = await resolveConversationId(args)
+
+  const { whatsapp_message_id } = await engineSendMedia({
+    accountId: args.automation.account_id,
+    userId: args.automation.user_id,
+    conversationId,
+    contactId: args.contactId,
+    kind: 'image',
+    link,
+    caption,
+  })
+
+  return `image sent via Meta (${whatsapp_message_id})`
+}
     case 'send_buttons':
     case 'send_list': {
       const payload = step.step_config as SendButtonsStepConfig | SendListStepConfig
