@@ -547,6 +547,11 @@ export interface SendMessageStepConfig {
   caption?: string;
 }
 
+export interface SendImageStepConfig {
+  link: string;
+  caption?: string;
+}
+
 /**
  * `send_buttons` / `send_list` step configs carry the full interactive
  * payload (same shape stored on messages + quick replies). `kind` is
